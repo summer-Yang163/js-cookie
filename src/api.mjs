@@ -32,7 +32,7 @@ function init(converter, defaultAttributes) {
       // 为stringifiedAttributes 加参数名
       stringifiedAttributes += '; ' + attributeName
 
-      // 如果当前参数为true 则进入下一个循环,不需要记录=后面的值
+      // 如果当前参数为true 则进入下一个循环,不需要记录=后面的值,比如Secure; HttpOnly 等字段
       if (attributes[attributeName] === true) {
         continue
       }
@@ -50,6 +50,8 @@ function init(converter, defaultAttributes) {
       /**
        * attributes:{
        * Expires:"Wed, 21 Oct 2015 07:28:00 GMT"
+       * Secure: true,
+       * HttpOnly: true
        * }
        */
       stringifiedAttributes += '=' + attributes[attributeName].split(';')[0]
@@ -64,9 +66,6 @@ function init(converter, defaultAttributes) {
     if (typeof document === 'undefined' || (arguments.length && !name)) {
       return
     }
-
-    // To prevent the for loop in the first place assign an empty array
-    // in case there are no cookies at all.
     // 获取cookies对象,并将cookies对象以; 分割,列为数组
     var cookies = document.cookie ? document.cookie.split('; ') : []
     var jar = {}
@@ -79,7 +78,7 @@ function init(converter, defaultAttributes) {
       try {
         // 对cookie key进行解码
         var found = decodeURIComponent(parts[0])
-        // 然后又再解码%20 这种,不理解
+        // 然后又再解码%aa 这种,不理解, found这里好像不需要,read函数中只用了一个参数
         jar[found] = converter.read(value, found)
 
         if (name === found) {
@@ -88,7 +87,7 @@ function init(converter, defaultAttributes) {
       } catch (e) {}
     }
 
-    // 返回
+    // 这里感觉name的判断有点没必要,前面有判断过!name,所以一直会返回jar[name]
     return name ? jar[name] : jar
   }
 
